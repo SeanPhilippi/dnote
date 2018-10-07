@@ -35,6 +35,7 @@ func NewCmd(ctx infra.DnoteCtx) *cobra.Command {
 }
 
 type responseData struct {
+	// TODO: should gzip? benchmark
 	Actions  []actions.Action `json:"actions"`
 	Bookmark int              `json:"bookmark"`
 }

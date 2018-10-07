@@ -148,7 +148,7 @@ func WriteConfig(ctx infra.DnoteCtx, config infra.Config) error {
 	return nil
 }
 
-// LogAction logs action and updates the last_action
+// LogAction logs action
 func LogAction(tx *sql.Tx, schema int, actionType, data string, timestamp int64) error {
 	uuid := uuid.NewV4().String()
 
@@ -156,11 +156,6 @@ func LogAction(tx *sql.Tx, schema int, actionType, data string, timestamp int64)
 	VALUES (?, ?, ?, ?, ?)`, uuid, schema, actionType, data, timestamp)
 	if err != nil {
 		return errors.Wrap(err, "inserting an action")
-	}
-
-	_, err = tx.Exec("UPDATE system SET value = ? WHERE key = ?", timestamp, "last_action")
-	if err != nil {
-		return errors.Wrap(err, "updating last_action")
 	}
 
 	return nil

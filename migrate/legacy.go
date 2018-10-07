@@ -459,7 +459,6 @@ type migrateToV8Timestamp struct {
 }
 
 var migrateToV8SystemKeyLastUpgrade = "last_upgrade"
-var migrateToV8SystemKeyLastAction = "last_action"
 var migrateToV8SystemKeyBookMark = "bookmark"
 
 /***** migrations **/
@@ -916,12 +915,6 @@ func migrateToV8(ctx infra.DnoteCtx) error {
 	if err != nil {
 		tx.Rollback()
 		return errors.Wrap(err, "inserting the last_upgrade value")
-	}
-	_, err = tx.Exec(`INSERT INTO system (key, value) VALUES (?, ?)`,
-		migrateToV8SystemKeyLastAction, timestamp.LastAction)
-	if err != nil {
-		tx.Rollback()
-		return errors.Wrap(err, "inserting the last_action value")
 	}
 	_, err = tx.Exec(`INSERT INTO system (key, value) VALUES (?, ?)`,
 		migrateToV8SystemKeyBookMark, timestamp.Bookmark)

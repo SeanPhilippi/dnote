@@ -570,14 +570,10 @@ func TestMigrateToV8(t *testing.T) {
 
 	testutils.AssertEqual(t, systemCount, 3, "action count mismatch")
 
-	var lastUpgrade, lastAction, bookmark int
+	var lastUpgrade, bookmark int
 	err = db.QueryRow("SELECT value FROM system WHERE key = ?", "last_upgrade").Scan(&lastUpgrade)
 	if err != nil {
 		panic(errors.Wrap(err, "finding last_upgrade"))
-	}
-	err = db.QueryRow("SELECT value FROM system WHERE key = ?", "last_action").Scan(&lastAction)
-	if err != nil {
-		panic(errors.Wrap(err, "finding last_action"))
 	}
 	err = db.QueryRow("SELECT value FROM system WHERE key = ?", "bookmark").Scan(&bookmark)
 	if err != nil {
@@ -585,6 +581,5 @@ func TestMigrateToV8(t *testing.T) {
 	}
 
 	testutils.AssertEqual(t, lastUpgrade, 1536977220, "last_upgrade mismatch")
-	testutils.AssertEqual(t, lastAction, 1536977274, "last_action mismatch")
 	testutils.AssertEqual(t, bookmark, 9, "bookmark mismatch")
 }
