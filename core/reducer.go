@@ -12,35 +12,82 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ReduceAll reduces all actions
-func ReduceAll(ctx infra.DnoteCtx, tx *sql.Tx, actionSlice []actions.Action) error {
-	for _, action := range actionSlice {
-		if err := Reduce(ctx, tx, action); err != nil {
-			return errors.Wrap(err, "reducing action")
-		}
+// RewindAction rewinds the given action according to its type
+func RewindAction(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+	var err error
+
+	switch action.Type {
+	case actions.ActionAddBook:
+		err = rewindAddBook(ctx, tx, action)
+		//	case actions.ActionRemoveBook:
+		//		err = rewindRemoveBook(ctx, tx, action)
+		//	case actions.ActionAddNote:
+		//		err = rewindAddNote(ctx, tx, action)
+		//	case actions.ActionRemoveNote:
+		//		err = rewindRemoveNote(ctx, tx, action)
+		//	case actions.ActionEditNote:
+		//		err = rewindEditNote(ctx, tx, action)
+	default:
+		return errors.Wrapf(err, "Unsupported action type: %s", action.Type)
+	}
+
+	if err != nil {
+		return errors.Wrapf(err, "rewinding an action %s", action.Type)
 	}
 
 	return nil
 }
 
-// Reduce transitions the local dnote state by consuming the action returned
+// rewindAddBook rewinds the given add_book action
+func rewindAddBook(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+	if action.Schema != 1 {
+		return errors.Errorf("unsupported schema %d", action.Schema)
+	}
+
+	var data actions.AddBookDataV1
+	if err := json.Unmarshal(action.Data, &data); err != nil {
+		return errors.Wrap(err, "parsing action data")
+	}
+
+	if _, err := tx.Exec("DELETE FROM books WHERE label = ?", data.BookName); err != nil {
+		return errors.Wrap(err, "removing book")
+	}
+
+	return nil
+}
+
+// rewindRemoveBook rewinds the given remove_book action
+func rewindRemoveBook(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+	if action.Schema != 1 {
+		return errors.Errorf("unsupported schema %d", action.Schema)
+	}
+
+	var data actions.RemoveBookDataV1
+	if err := json.Unmarshal(action.Data, &data); err != nil {
+		return errors.Wrap(err, "parsing action data")
+	}
+
+	return nil
+}
+
+// PlayAction transitions the local dnote state by consuming the action returned
 // from the server
-func Reduce(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
-	log.Debug("reducing %s. uuid: %s, schema: %d, timestamp: %d\n", action.Type, action.UUID, action.Schema, action.Timestamp)
+func PlayAction(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+	log.Debug("playing %s. uuid: %s, schema: %d, timestamp: %d\n", action.Type, action.UUID, action.Schema, action.Timestamp)
 
 	var err error
 
 	switch action.Type {
 	case actions.ActionAddNote:
-		err = handleAddNote(ctx, tx, action)
+		err = playAddNote(ctx, tx, action)
 	case actions.ActionRemoveNote:
-		err = handleRemoveNote(ctx, tx, action)
+		err = playRemoveNote(ctx, tx, action)
 	case actions.ActionEditNote:
-		err = handleEditNote(ctx, tx, action)
+		err = playEditNote(ctx, tx, action)
 	case actions.ActionAddBook:
-		err = handleAddBook(ctx, tx, action)
+		err = playAddBook(ctx, tx, action)
 	case actions.ActionRemoveBook:
-		err = handleRemoveBook(ctx, tx, action)
+		err = playRemoveBook(ctx, tx, action)
 	default:
 		return errors.Errorf("Unsupported action %s", action.Type)
 	}
@@ -64,7 +111,34 @@ func getBookUUIDWithTx(tx *sql.Tx, bookLabel string) (string, error) {
 	return ret, nil
 }
 
-func handleAddNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+// AddNote adds a note and logs the action
+func AddNote(tx *sql.Tx, bookUUID, bookLabel, content string, ts int64) error {
+	uuid, err := performAddNote(tx, bookUUID, bookLabel, content, ts)
+	if err != nil {
+		return errors.Wrap(err, "adding note")
+	}
+
+	err = LogActionAddNote(tx, uuid, bookLabel, content, ts)
+	if err != nil {
+		return errors.Wrap(err, "logging action")
+	}
+
+	return nil
+}
+
+func performAddNote(tx *sql.Tx, bookUUID, bookLabel, content string, ts int64) (string, error) {
+	uuid := utils.GenerateUUID()
+
+	_, err := tx.Exec(`INSERT INTO notes (uuid, book_uuid, content, added_on, public)
+		VALUES (?, ?, ?, ?, ?);`, uuid, bookUUID, content, ts, false)
+	if err != nil {
+		return uuid, errors.Wrap(err, "creating the note")
+	}
+
+	return uuid, nil
+}
+
+func playAddNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
 	if action.Schema != 2 {
 		return errors.Errorf("data schema '%d' not supported", action.Schema)
 	}
@@ -106,7 +180,7 @@ func handleAddNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error 
 	return nil
 }
 
-func handleRemoveNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+func playRemoveNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
 	if action.Schema != 2 {
 		return errors.Errorf("data schema '%d' not supported", action.Schema)
 	}
@@ -155,7 +229,7 @@ func buildEditNoteQuery(ctx infra.DnoteCtx, tx *sql.Tx, noteUUID string, ts int6
 	return queryTmpl, queryArgs, nil
 }
 
-func handleEditNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+func playEditNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
 	if action.Schema != 3 {
 		return errors.Errorf("data schema '%d' not supported", action.Schema)
 	}
@@ -180,7 +254,35 @@ func handleEditNote(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error
 	return nil
 }
 
-func handleAddBook(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+// HandleAddBook adds a new book and logs the action
+func HandleAddBook(tx *sql.Tx, bookLabel string) (string, error) {
+	uuid, err := performAddBook(tx, bookLabel)
+	if err != nil {
+		return uuid, errors.Wrap(err, "performing add_book")
+	}
+
+	if err := LogActionAddBook(tx, bookLabel); err != nil {
+		tx.Rollback()
+		return uuid, errors.Wrap(err, "logging action")
+	}
+
+	return uuid, nil
+}
+
+// performAddBook encapsulates the actual low-level details of adding a book
+func performAddBook(tx *sql.Tx, bookLabel string) (string, error) {
+	uuid := utils.GenerateUUID()
+
+	if _, err := tx.Exec("INSERT INTO books (uuid, label) VALUES (?, ?)", uuid, bookLabel); err != nil {
+		tx.Rollback()
+		return uuid, errors.Wrap(err, "creating the book")
+	}
+
+	return uuid, nil
+}
+
+// playAddBook checks if the given add_book action needs to be played and plays it
+func playAddBook(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
 	if action.Schema != 1 {
 		return errors.Errorf("data schema '%d' not supported", action.Schema)
 	}
@@ -198,22 +300,20 @@ func handleAddBook(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error 
 	if err != nil {
 		return errors.Wrap(err, "counting books")
 	}
-
 	if bookCount > 0 {
-		// If book already exists, another machine added a book with the same name.
+		// If book already exists, bookmark was not updated for any error
 		// noop
 		return nil
 	}
 
-	_, err = tx.Exec("INSERT INTO books (uuid, label) VALUES (?, ?)", utils.GenerateUUID(), data.BookName)
-	if err != nil {
+	if _, err = performAddBook(tx, data.BookName); err != nil {
 		return errors.Wrap(err, "inserting a book")
 	}
 
 	return nil
 }
 
-func handleRemoveBook(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
+func playRemoveBook(ctx infra.DnoteCtx, tx *sql.Tx, action actions.Action) error {
 	if action.Schema != 1 {
 		return errors.Errorf("data schema '%d' not supported", action.Schema)
 	}

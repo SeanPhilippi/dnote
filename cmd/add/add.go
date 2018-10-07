@@ -8,7 +8,6 @@ import (
 	"github.com/dnote/cli/core"
 	"github.com/dnote/cli/infra"
 	"github.com/dnote/cli/log"
-	"github.com/dnote/cli/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -91,33 +90,20 @@ func writeNote(ctx infra.DnoteCtx, bookLabel string, content string, ts int64) e
 	var bookUUID string
 	err = tx.QueryRow("SELECT uuid FROM books WHERE label = ?", bookLabel).Scan(&bookUUID)
 	if err == sql.ErrNoRows {
-		bookUUID = utils.GenerateUUID()
-		_, err = tx.Exec("INSERT INTO books (uuid, label) VALUES (?, ?)", bookUUID, bookLabel)
-		if err != nil {
+		uuid, e := core.HandleAddBook(tx, bookLabel)
+		if e != nil {
 			tx.Rollback()
-			return errors.Wrap(err, "creating the book")
+			return errors.Wrap(e, "adding the book")
 		}
 
-		err = core.LogActionAddBook(tx, bookLabel)
-		if err != nil {
-			tx.Rollback()
-			return errors.Wrap(err, "logging action")
-		}
+		bookUUID = uuid
 	} else if err != nil {
 		return errors.Wrap(err, "finding the book")
 	}
 
-	noteUUID := utils.GenerateUUID()
-	_, err = tx.Exec(`INSERT INTO notes (uuid, book_uuid, content, added_on, public)
-		VALUES (?, ?, ?, ?, ?);`, noteUUID, bookUUID, content, ts, false)
+	err = core.AddNote(tx, bookUUID, bookLabel, content, ts)
 	if err != nil {
-		tx.Rollback()
-		return errors.Wrap(err, "creating the note")
-	}
-	err = core.LogActionAddNote(tx, noteUUID, bookLabel, content, ts)
-	if err != nil {
-		tx.Rollback()
-		return errors.Wrap(err, "logging action")
+		return errors.Wrap(err, "adding the note")
 	}
 
 	tx.Commit()

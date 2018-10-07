@@ -59,8 +59,7 @@ func newRun(ctx infra.DnoteCtx) core.RunEFunc {
 		}
 
 		var bookmark int
-		err = db.QueryRow("SELECT value FROM system WHERE key = ?", "bookmark").Scan(&bookmark)
-		if err != nil {
+		if err = db.QueryRow("SELECT value FROM system WHERE key = ?", "bookmark").Scan(&bookmark); err != nil {
 			return errors.Wrap(err, "getting bookmark")
 		}
 
@@ -99,10 +98,10 @@ func newRun(ctx infra.DnoteCtx) core.RunEFunc {
 			return errors.Wrap(err, "unmarshalling the payload")
 		}
 
-		// First, remove our actions because server has successfully ingested them
-		if _, err = db.Exec("DELETE FROM actions"); err != nil {
-			return errors.Wrap(err, "deleting actions")
-		}
+		//	// First, remove our actions because server has successfully ingested them
+		//	if _, err = db.Exec("DELETE FROM actions"); err != nil {
+		//		return errors.Wrap(err, "deleting actions")
+		//	}
 
 		tx, err := db.Begin()
 		if err != nil {

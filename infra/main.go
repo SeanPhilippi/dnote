@@ -37,6 +37,15 @@ type Config struct {
 	APIKey string
 }
 
+// Note represents a single microlesson
+type Note struct {
+	UUID     string `json:"uuid"`
+	Content  string `json:"content"`
+	AddedOn  int64  `json:"added_on"`
+	EditedOn int64  `json:"edited_on"`
+	Public   bool   `json:"public"`
+}
+
 // NewCtx returns a new dnote context
 func NewCtx(apiEndpoint, versionTag string) (DnoteCtx, error) {
 	homeDir, err := getHomeDir()

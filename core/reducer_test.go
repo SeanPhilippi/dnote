@@ -36,7 +36,7 @@ func TestReduceAddNote(t *testing.T) {
 	if err != nil {
 		panic(errors.Wrap(err, "beginning a transaction"))
 	}
-	if err = Reduce(ctx, tx, action); err != nil {
+	if err = PlayAction(ctx, tx, action); err != nil {
 		tx.Rollback()
 		t.Fatal(errors.Wrap(err, "processing action"))
 	}
@@ -85,7 +85,7 @@ func TestReduceRemoveNote(t *testing.T) {
 	if err != nil {
 		panic(errors.Wrap(err, "beginning a transaction"))
 	}
-	if err = Reduce(ctx, tx, action); err != nil {
+	if err = PlayAction(ctx, tx, action); err != nil {
 		tx.Rollback()
 		t.Fatal(errors.Wrap(err, "processing action"))
 	}
@@ -178,7 +178,7 @@ func TestReduceEditNote(t *testing.T) {
 			if err != nil {
 				panic(errors.Wrap(err, "beginning a transaction"))
 			}
-			err = Reduce(ctx, tx, action)
+			err = PlayAction(ctx, tx, action)
 			if err != nil {
 				tx.Rollback()
 				t.Fatal(errors.Wrap(err, "Failed to process action"))
@@ -236,7 +236,7 @@ func TestReduceAddBook(t *testing.T) {
 	if err != nil {
 		panic(errors.Wrap(err, "beginning a transaction"))
 	}
-	if err = Reduce(ctx, tx, action); err != nil {
+	if err = PlayAction(ctx, tx, action); err != nil {
 		tx.Rollback()
 		t.Fatal(errors.Wrap(err, "Failed to process action"))
 	}
@@ -272,7 +272,7 @@ func TestReduceRemoveBook(t *testing.T) {
 	if err != nil {
 		panic(errors.Wrap(err, "beginning a transaction"))
 	}
-	if err = Reduce(ctx, tx, action); err != nil {
+	if err = PlayAction(ctx, tx, action); err != nil {
 		tx.Rollback()
 		t.Fatal(errors.Wrap(err, "Failed to process action"))
 	}
