@@ -11,7 +11,7 @@ import (
 
 	"github.com/dnote/cli/infra"
 	"github.com/dnote/cli/log"
-	"github.com/dnote/cli/utils"
+	"github.com/dnote/fileutils"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	"gopkg.in/yaml.v2"
@@ -67,7 +67,7 @@ func makeSchema(complete bool) schema {
 func Legacy(ctx infra.DnoteCtx) error {
 	// If schema does not exist, no need run a legacy migration
 	schemaPath := getSchemaPath(ctx)
-	if ok := utils.FileExists(schemaPath); !ok {
+	if ok := fileutils.Exists(schemaPath); !ok {
 		return nil
 	}
 
@@ -148,7 +148,7 @@ func backupDnoteDir(ctx infra.DnoteCtx) error {
 	srcPath := fmt.Sprintf("%s/.dnote", ctx.HomeDir)
 	tmpPath := fmt.Sprintf("%s/%s", ctx.HomeDir, backupDirName)
 
-	if err := utils.CopyDir(srcPath, tmpPath); err != nil {
+	if err := fileutils.CopyDir(srcPath, tmpPath); err != nil {
 		return errors.Wrap(err, "Failed to copy the .dnote directory")
 	}
 
@@ -454,7 +454,7 @@ var migrateToV8SystemKeyBookMark = "bookmark"
 // migrateToV1 deletes YAML archive if exists
 func migrateToV1(ctx infra.DnoteCtx) error {
 	yamlPath := fmt.Sprintf("%s/%s", ctx.HomeDir, ".dnote-yaml-archived")
-	if !utils.FileExists(yamlPath) {
+	if !fileutils.Exists(yamlPath) {
 		return nil
 	}
 

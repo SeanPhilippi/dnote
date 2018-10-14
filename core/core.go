@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/dnote/cli/infra"
-	"github.com/dnote/cli/utils"
+	"github.com/dnote/fileutils"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	"github.com/spf13/cobra"
@@ -93,7 +93,7 @@ func InitFiles(ctx infra.DnoteCtx) error {
 func initConfigFile(ctx infra.DnoteCtx) error {
 	path := GetConfigPath(ctx)
 
-	if utils.FileExists(path) {
+	if fileutils.Exists(path) {
 		return nil
 	}
 
@@ -120,7 +120,7 @@ func initConfigFile(ctx infra.DnoteCtx) error {
 func initDnoteDir(ctx infra.DnoteCtx) error {
 	path := ctx.DnoteDir
 
-	if utils.FileExists(path) {
+	if fileutils.Exists(path) {
 		return nil
 	}
 
@@ -213,7 +213,7 @@ func newEditorCmd(ctx infra.DnoteCtx, fpath string) (*exec.Cmd, error) {
 // GetEditorInput gets the user input by launching a text editor and waiting for
 // it to exit
 func GetEditorInput(ctx infra.DnoteCtx, fpath string, content *string) error {
-	if !utils.FileExists(fpath) {
+	if !fileutils.Exists(fpath) {
 		f, err := os.Create(fpath)
 		if err != nil {
 			return errors.Wrap(err, "creating a temporary content file")

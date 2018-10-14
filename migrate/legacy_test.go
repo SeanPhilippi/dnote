@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/dnote/cli/testutils"
-	"github.com/dnote/cli/utils"
+	"github.com/dnote/fileutils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -34,7 +34,7 @@ func TestMigrateToV1(t *testing.T) {
 		}
 
 		// test
-		if utils.FileExists(yamlPath) {
+		if fileutils.Exists(yamlPath) {
 			t.Fatal("YAML archive file has not been deleted")
 		}
 	})
@@ -55,7 +55,7 @@ func TestMigrateToV1(t *testing.T) {
 		}
 
 		// test
-		if utils.FileExists(yamlPath) {
+		if fileutils.Exists(yamlPath) {
 			t.Fatal("YAML archive file must not exist")
 		}
 	})
@@ -338,16 +338,16 @@ func TestMigrateToV8(t *testing.T) {
 	dnotercPath := fmt.Sprintf("%s/dnoterc", ctx.DnoteDir)
 	schemaFilePath := fmt.Sprintf("%s/schema", ctx.DnoteDir)
 	timestampFilePath := fmt.Sprintf("%s/timestamps", ctx.DnoteDir)
-	if ok := utils.FileExists(dnoteFilePath); ok {
+	if ok := fileutils.Exists(dnoteFilePath); ok {
 		t.Errorf("%s still exists", dnoteFilePath)
 	}
-	if ok := utils.FileExists(schemaFilePath); ok {
+	if ok := fileutils.Exists(schemaFilePath); ok {
 		t.Errorf("%s still exists", dnoteFilePath)
 	}
-	if ok := utils.FileExists(timestampFilePath); ok {
+	if ok := fileutils.Exists(timestampFilePath); ok {
 		t.Errorf("%s still exists", dnoteFilePath)
 	}
-	if ok := utils.FileExists(dnotercPath); !ok {
+	if ok := fileutils.Exists(dnotercPath); !ok {
 		t.Errorf("%s should exist", dnotercPath)
 	}
 

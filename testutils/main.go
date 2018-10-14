@@ -16,7 +16,7 @@ import (
 	"testing"
 
 	"github.com/dnote/cli/infra"
-	"github.com/dnote/cli/utils"
+	"github.com/dnote/fileutils"
 	"github.com/pkg/errors"
 )
 
@@ -70,7 +70,7 @@ func CopyFixture(ctx infra.DnoteCtx, fixturePath string, filename string) {
 		panic(err)
 	}
 
-	err = utils.CopyFile(fp, dp)
+	err = fileutils.CopyFile(fp, dp)
 	if err != nil {
 		panic(err)
 	}

@@ -14,7 +14,7 @@ import (
 	"github.com/dnote/cli/core"
 	"github.com/dnote/cli/infra"
 	"github.com/dnote/cli/testutils"
-	"github.com/dnote/cli/utils"
+	"github.com/dnote/fileutils"
 )
 
 var binaryName = "test-dnote"
@@ -37,10 +37,10 @@ func TestInit(t *testing.T) {
 	testutils.RunDnoteCmd(t, ctx, binaryName)
 
 	// Test
-	if !utils.FileExists(ctx.DnoteDir) {
+	if !fileutils.Exists(ctx.DnoteDir) {
 		t.Errorf("dnote directory was not initialized")
 	}
-	if !utils.FileExists(fmt.Sprintf("%s/%s", ctx.DnoteDir, core.ConfigFilename)) {
+	if !fileutils.Exists(fmt.Sprintf("%s/%s", ctx.DnoteDir, core.ConfigFilename)) {
 		t.Errorf("config file was not initialized")
 	}
 
