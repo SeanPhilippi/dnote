@@ -48,22 +48,32 @@ func NewCmd(ctx infra.DnoteCtx) *cobra.Command {
 	return cmd
 }
 
-func isReservedName(name string) bool {
+// ErrBookNameInteger is returned by validateName if the book name is an integer
+var ErrBookNameInteger = errors.New("book name cannot be an integer")
+
+// ErrBookNameReserved is returned by validateName if the book name is reserved
+var ErrBookNameReserved = errors.New("book name is reserved")
+
+func validateName(name string) error {
+	if utils.IsInt(name) {
+		return ErrBookNameInteger
+	}
+
 	for _, n := range reservedBookNames {
 		if name == n {
-			return true
+			return ErrBookNameReserved
 		}
 	}
 
-	return false
+	return nil
 }
 
 func newRun(ctx infra.DnoteCtx) core.RunEFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		bookName := args[0]
 
-		if isReservedName(bookName) {
-			return errors.Errorf("book name '%s' is reserved", bookName)
+		if err := validateName(bookName); err != nil {
+			return errors.Wrap(err, "validating book name")
 		}
 
 		if content == "" {

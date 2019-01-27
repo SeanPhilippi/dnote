@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/dnote/cli/infra"
@@ -15,6 +16,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 )
+
+var regexInt = regexp.MustCompile("^(?:[-+]?(?:0|[1-9][0-9]*))$")
 
 // GenerateUUID returns a uid
 func GenerateUUID() string {
@@ -166,4 +169,13 @@ func CopyFile(src, dest string) error {
 	}
 
 	return nil
+}
+
+// IsInt checks if the given string is in the form of an integer
+func IsInt(s string) bool {
+	if s == "" {
+		return false
+	}
+
+	return regexInt.MatchString(s)
 }
