@@ -11,54 +11,15 @@ const selfHostedPerks = [
   }
 ];
 
-const baseFeatures = [
-  {
-    id: 'backup',
-    label: <div>Encrypted backup using AES256</div>
-  },
-  {
-    id: 'sync',
-    label: <div>Multi-device sync</div>
-  },
-  {
-    id: 'cli',
-    label: <div>Command line interface</div>
-  },
-  {
-    id: 'atom',
-    label: <div>Atom plugin</div>
-  },
-  {
-    id: 'web',
-    label: <div>Web client</div>
-  },
-  {
-    id: 'digest',
-    label: <div>Automated email digest</div>
-  },
-  {
-    id: 'ext',
-    label: <div>Firefox/Chrome extension</div>
-  },
-  {
-    id: 'foss',
-    label: <div>Free and open source</div>
-  },
-  {
-    id: 'forum-support',
-    label: <div>Forum support</div>
-  }
-];
-
-function Core({ wrapperClassName, ctaContent }) {
+function Core({ wrapperClassName, ctaContent, bottomContent }) {
   return (
     <Plan
       name="Core"
       price="Free"
-      features={baseFeatures}
       perks={selfHostedPerks}
       wrapperClassName={wrapperClassName}
       ctaContent={ctaContent}
+      bottomContent={bottomContent}
     />
   );
 }

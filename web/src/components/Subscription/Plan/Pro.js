@@ -4,27 +4,6 @@ import Plan from './internal';
 import ServerIcon from '../../Icons/Server';
 import GlobeIcon from '../../Icons/Globe';
 
-import styles from './Plan.module.scss';
-
-const proFeatures = [
-  {
-    id: 'core',
-    label: <div className={styles['feature-bold']}>Everything in core</div>
-  },
-  {
-    id: 'host',
-    label: <div>Hosting</div>
-  },
-  {
-    id: 'auto',
-    label: <div>Automatic update and migration</div>
-  },
-  {
-    id: 'email-support',
-    label: <div>Email support</div>
-  }
-];
-
 const proPerks = [
   {
     id: 'hosted',
@@ -38,16 +17,16 @@ const proPerks = [
   }
 ];
 
-function ProPlan({ wrapperClassName, ctaContent }) {
+function ProPlan({ wrapperClassName, ctaContent, bottomContent }) {
   return (
     <Plan
       name="Pro"
       price="$3"
       interval="month"
-      features={proFeatures}
       perks={proPerks}
-      ctaContent={ctaContent}
       wrapperClassName={wrapperClassName}
+      ctaContent={ctaContent}
+      bottomContent={bottomContent}
     />
   );
 }

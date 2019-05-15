@@ -24,10 +24,68 @@ import classnames from 'classnames';
 
 import ProPlan from './Plan/Pro';
 import CorePlan from './Plan/Core';
+import FeatureList from './FeatureList';
 import { getSubscriptionCheckoutPath } from '../../libs/paths';
 
 import styles from './Subscription.module.scss';
 
+const proFeatures = [
+  {
+    id: 'core',
+    label: <div className={styles['feature-bold']}>Everything in core</div>
+  },
+  {
+    id: 'host',
+    label: <div>Hosting</div>
+  },
+  {
+    id: 'auto',
+    label: <div>Automatic update and migration</div>
+  },
+  {
+    id: 'email-support',
+    label: <div>Email support</div>
+  }
+];
+
+const baseFeatures = [
+  {
+    id: 'backup',
+    label: <div>Encrypted backup using AES256</div>
+  },
+  {
+    id: 'sync',
+    label: <div>Multi-device sync</div>
+  },
+  {
+    id: 'cli',
+    label: <div>Command line interface</div>
+  },
+  {
+    id: 'atom',
+    label: <div>Atom plugin</div>
+  },
+  {
+    id: 'web',
+    label: <div>Web client</div>
+  },
+  {
+    id: 'digest',
+    label: <div>Automated email digest</div>
+  },
+  {
+    id: 'ext',
+    label: <div>Firefox/Chrome extension</div>
+  },
+  {
+    id: 'foss',
+    label: <div>Free and open source</div>
+  },
+  {
+    id: 'forum-support',
+    label: <div>Forum support</div>
+  }
+];
 function Subscription({ userData }) {
   const user = userData.data;
 
@@ -132,6 +190,7 @@ function Subscription({ userData }) {
       <div className="container">
         <div className={styles['plans-wrapper']}>
           <CorePlan
+            wrapperClassName={styles['core-plan']}
             ctaContent={
               <a
                 href="https://github.com/dnote/dnote"
@@ -142,12 +201,13 @@ function Subscription({ userData }) {
                 See source code
               </a>
             }
-            wrapperClassName={styles['core-plan']}
+            bottomContent={<FeatureList features={baseFeatures} />}
           />
 
           <ProPlan
             wrapperClassName={styles['pro-plan']}
             ctaContent={renderPlanCta()}
+            bottomContent={<FeatureList features={proFeatures} />}
           />
         </div>
       </div>

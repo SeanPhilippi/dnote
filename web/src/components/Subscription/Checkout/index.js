@@ -3,6 +3,7 @@ import classnames from 'classnames';
 
 import * as paymentService from '../../../services/payment';
 import { useScript } from '../../../libs/hooks';
+import ProPlan from '../Plan/Pro';
 
 import styles from './Checkout.module.scss';
 
@@ -17,7 +18,9 @@ function Checkout({}) {
         <div className="col-12 col-md-8">
           <h1>You are almost there.</h1>
         </div>
-        <div className="col-12 col-md-4">right</div>
+        <div className="col-12 col-md-4">
+          <ProPlan />
+        </div>
       </div>
     </div>
   );
