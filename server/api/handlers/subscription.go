@@ -33,14 +33,10 @@ import (
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
 	"github.com/stripe/stripe-go/customer"
+	"github.com/stripe/stripe-go/paymentsource"
 	"github.com/stripe/stripe-go/sub"
 	"github.com/stripe/stripe-go/webhook"
 )
-
-type stripeToken struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-}
 
 var planID = "plan_EpgsEvY27pajfo"
 
@@ -80,48 +76,68 @@ func getOrCreateStripeCustomer(tx *gorm.DB, user database.User) (*stripe.Custome
 
 // createSub creates a subscription for a the current user
 func (a *App) createSub(w http.ResponseWriter, r *http.Request) {
-	db := database.DBConn
-	// tx := db.Begin()
-
 	user, ok := r.Context().Value(helpers.KeyUser).(database.User)
 	if !ok {
 		http.Error(w, "No authenticated user found", http.StatusInternalServerError)
 		return
 	}
-	if user.StripeCustomerID != "" {
-		http.Error(w, "Customer already exists", http.StatusForbidden)
-		return
-	}
 
-	var tok stripeToken
-	if err := json.NewDecoder(r.Body).Decode(&tok); err != nil {
+	var payload stripe.Source
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, errors.Wrap(err, "decoding params").Error(), http.StatusInternalServerError)
 		return
 	}
 
-	customerParams := &stripe.CustomerParams{
-		Plan:  &planID,
-		Email: &tok.Email,
-	}
-	err := customerParams.SetSource(tok.ID)
+	db := database.DBConn
+	tx := db.Begin()
+
+	customer, err := getOrCreateStripeCustomer(tx, user)
 	if err != nil {
-		http.Error(w, errors.Wrap(err, "setting source").Error(), http.StatusInternalServerError)
+		tx.Rollback()
+		logger.Err("Error getting customer: %v\n", err)
+		http.Error(w, errors.New("something went wrong").Error(), http.StatusInternalServerError)
 		return
 	}
 
-	//TODO: if customer exists, update not create
-	c, err := customer.New(customerParams)
+	params := &stripe.CustomerSourceParams{
+		Customer: stripe.String(customer.ID),
+		Source: &stripe.SourceParams{
+			Token: stripe.String(payload.ID),
+		},
+	}
+	_, err = paymentsource.New(params)
 	if err != nil {
-		http.Error(w, errors.Wrap(err, "creating customer").Error(), http.StatusInternalServerError)
+		tx.Rollback()
+		logger.Err("Error attaching source: %v\n", err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 
-	user.StripeCustomerID = c.ID
+	subParams := &stripe.SubscriptionParams{
+		Customer: stripe.String(customer.ID),
+		Items: []*stripe.SubscriptionItemsParams{
+			{
+				Plan: stripe.String(planID),
+			},
+		},
+	}
+	_, err = sub.New(subParams)
+	if err != nil {
+		tx.Rollback()
+		logger.Err("Error creating subscription: %v\n", err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+
 	user.Cloud = true
-	if err := db.Save(&user).Error; err != nil {
-		http.Error(w, errors.Wrap(err, "updating user").Error(), http.StatusInternalServerError)
+	if err := tx.Save(&user).Error; err != nil {
+		tx.Rollback()
+		logger.Err("updating user: %v\n", err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
+
+	tx.Commit()
 }
 
 type updateSubPayload struct {

@@ -30,6 +30,8 @@ function Form({ isReady, stripe }) {
         }
       });
 
+      console.log('source', source);
+
       await paymentService.createSubscription({ source });
     } catch (err) {
       console.log('error subscribing', err);
