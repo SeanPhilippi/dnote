@@ -1,28 +1,30 @@
 import React from 'react';
-import classnames from 'classnames';
+import { StripeProvider, Elements } from 'react-stripe-elements';
 
-import * as paymentService from '../../../services/payment';
 import { useScript } from '../../../libs/hooks';
-import ProPlan from '../Plan/Pro';
+import CheckoutForm from './Form';
 
-import styles from './Checkout.module.scss';
+function Checkout({ user }) {
+  const [stripeLoaded, stripeLoadError] = useScript('https://js.stripe.com/v3');
 
-function Checkout({}) {
-  const [stripeLoaded, stripeLoadError] = useScript(
-    'https://checkout.stripe.com/checkout.js'
-  );
+  let key;
+  if (__PRODUCTION__) {
+    key = 'pk_live_xvouPZFPDDBSIyMUSLZwkXfR';
+  } else {
+    key = 'pk_test_5926f65DQoIilZeNOiKydfoN';
+  }
+
+  let stripe = null;
+  if (stripeLoaded) {
+    stripe = window.Stripe(key);
+  }
 
   return (
-    <div className={classnames('container', styles.wrapper)}>
-      <div className="row">
-        <div className="col-12 col-md-8">
-          <h1>You are almost there.</h1>
-        </div>
-        <div className="col-12 col-md-4">
-          <ProPlan />
-        </div>
-      </div>
-    </div>
+    <StripeProvider stripe={stripe}>
+      <Elements>
+        <CheckoutForm isReady={stripeLoaded} />
+      </Elements>
+    </StripeProvider>
   );
 }
 

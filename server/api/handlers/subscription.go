@@ -28,6 +28,7 @@ import (
 	"github.com/dnote/dnote/server/api/logger"
 	"github.com/dnote/dnote/server/api/operations"
 	"github.com/dnote/dnote/server/database"
+	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
@@ -46,9 +47,41 @@ var planID = "plan_EpgsEvY27pajfo"
 func init() {
 }
 
+func getOrCreateStripeCustomer(tx *gorm.DB, user database.User) (*stripe.Customer, error) {
+	if user.StripeCustomerID != "" {
+		c, err := customer.Get(user.StripeCustomerID, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "getting customer")
+		}
+
+		return c, nil
+	}
+
+	var account database.Account
+	if err := tx.Where("user_id = ?", user.ID).First(&account).Error; err != nil {
+		return nil, errors.Wrap(err, "finding account")
+	}
+
+	customerParams := &stripe.CustomerParams{
+		Email: &account.Email.String,
+	}
+	c, err := customer.New(customerParams)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating customer")
+	}
+
+	user.StripeCustomerID = c.ID
+	if err := tx.Save(&user).Error; err != nil {
+		return nil, errors.Wrap(err, "updating user")
+	}
+
+	return c, nil
+}
+
 // createSub creates a subscription for a the current user
 func (a *App) createSub(w http.ResponseWriter, r *http.Request) {
 	db := database.DBConn
+	// tx := db.Begin()
 
 	user, ok := r.Context().Value(helpers.KeyUser).(database.User)
 	if !ok {
