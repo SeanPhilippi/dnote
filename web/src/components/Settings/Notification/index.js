@@ -28,7 +28,7 @@ import Flash from '../../Common/Flash';
 import { getEmailPreference } from '../../../actions/auth';
 import FrequencyModal from './FrequencyModal';
 import SettingRow from '../SettingRow';
-import { settingsPath } from '../../../libs/paths';
+import { getSettingsPath } from '../../../libs/paths';
 
 import settingsStyles from '../Settings.module.scss';
 
@@ -116,7 +116,7 @@ function Email({ emailPreferenceData, doGetEmailPreference }) {
                   digests.
                 </div>
                 <Link
-                  to={settingsPath('account')}
+                  to={getSettingsPath('account')}
                   className={classnames(
                     'button button-second',
                     settingsStyles['verification-banner-cta']

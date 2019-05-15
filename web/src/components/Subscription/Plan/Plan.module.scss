@@ -1,7 +1,7 @@
-@import '../App/responsive';
-@import '../App/variables';
-@import '../App/rem';
-@import '../App/font';
+@import '../../App/responsive';
+@import '../../App/variables';
+@import '../../App/rem';
+@import '../../App/font';
 
 .wrapper {
   @include breakpoint(md) {
@@ -96,4 +96,8 @@
   justify-content: center;
   align-items: flex-start;
   margin-top: rem(4px);
+}
+
+.feature-bold {
+  font-weight: 600;
 }

@@ -25,10 +25,10 @@ import SafeNavLink from '../../Link/SafeNavLink';
 import SafeLink from '../../Link/SafeLink';
 
 import {
-  homePath,
-  booksPath,
-  notePath,
-  digestsPath,
+  getHomePath,
+  getBooksPath,
+  getNotePath,
+  getDigestsPath,
   subscriptionsPath
 } from '../../../../libs/paths';
 import { parseSearchString } from '../../../../libs/url';
@@ -130,7 +130,7 @@ async function handleCreateNote({
     doAddNote(note, year, month);
 
     const queryObj = parseSearchString(location.search);
-    const dest = notePath(note.uuid, queryObj, { isEditor: true });
+    const dest = getNotePath(note.uuid, queryObj, { isEditor: true });
     history.push(dest);
   } catch (e) {
     console.log('err', e);
@@ -180,9 +180,9 @@ const Sidebar = ({
     return () => null;
   }, [layoutData.sidebar, doCloseSidebar]);
 
-  const pathHome = homePath({}, { demo });
-  const pathBooks = booksPath({ demo });
-  const pathDigests = digestsPath({ demo });
+  const pathHome = getHomePath({}, { demo });
+  const pathBooks = getBooksPath({ demo });
+  const pathDigests = getDigestsPath({ demo });
 
   const user = userData.data;
 

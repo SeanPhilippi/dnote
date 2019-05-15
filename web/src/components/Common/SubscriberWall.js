@@ -21,7 +21,7 @@ import classnames from 'classnames';
 import { Link } from 'react-router-dom';
 
 import LockIcon from '../Icons/Lock';
-import { subscriptionsPath, homePath } from '../../libs/paths';
+import { getSubscriptionPath, getHomePath } from '../../libs/paths';
 
 import styles from './SubscriberWall.module.scss';
 
@@ -33,11 +33,11 @@ function SubscriberWall({ wrapperClassName }) {
       <div className={styles.lead}>Unlock Dnote Pro to get started.</div>
 
       <div className={styles.actions}>
-        <Link to={subscriptionsPath()} className="button button-first">
+        <Link to={getSubscriptionPath()} className="button button-first">
           Get started
         </Link>
         <Link
-          to={homePath({}, { demo: true })}
+          to={getHomePath({}, { demo: true })}
           className="button button-first-outline "
         >
           Live demo

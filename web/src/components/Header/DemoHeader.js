@@ -21,16 +21,16 @@ import classnames from 'classnames';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { subscriptionsPath, joinPath } from '../../libs/paths';
+import { getSubscriptionPath, getJoinPath } from '../../libs/paths';
 
 import styles from './DemoHeader.module.scss';
 
 function getPricingPath(user) {
   if (user) {
-    return subscriptionsPath();
+    return getSubscriptionPath();
   }
 
-  return joinPath({ referrer: subscriptionsPath() });
+  return getJoinPath({ referrer: getSubscriptionPath() });
 }
 
 function DemoHeader({ user }) {

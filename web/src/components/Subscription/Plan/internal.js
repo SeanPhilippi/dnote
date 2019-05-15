@@ -19,7 +19,7 @@
 import React from 'react';
 import classnames from 'classnames';
 
-import FeatureItem from './FeatureItem';
+import FeatureItem from '../FeatureItem';
 
 import styles from './Plan.module.scss';
 
