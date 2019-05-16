@@ -4,7 +4,7 @@
 @import '../../App/font';
 
 .header {
-  background: $dark-light3;
+  background: $light-gray;
   border-bottom: 1px solid $border-color;
 
   @include breakpoint(lg) {

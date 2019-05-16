@@ -1,6 +1,4 @@
-$dark-light3: #f7f7f7;
-$dark-light4: #929292;
-$dark-light5: #6e6e6e;
+$gray: #6e6e6e;
 
 $black: #2a2a2a;
 $white: #ffffff;
@@ -9,7 +7,7 @@ $gray: #686868;
 $light-gray: #f3f3f3;
 
 $border-color: #d8d8d8;
-$border-color-light: #f3f3f3;
+$border-color-light: $light-gray;
 
 //$danger-text: #721c24;
 $danger-text: #cb2431;

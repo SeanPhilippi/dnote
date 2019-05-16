@@ -186,14 +186,14 @@ button {
   display: block;
 
   &::placeholder {
-    color: $dark-light4;
+    color: $gray;
   }
   &:focus {
     border: 2px solid $third;
   }
 
   //  &:not(.text-input-transparent) {
-  //    background: $dark-light3;
+  //    background: $light-gray;
   //  }
   //  &.text-input-transparent {
   //    background: transparent;

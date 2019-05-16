@@ -5,7 +5,7 @@
 .wrapper {
   position: relative;
   overflow: hidden;
-  background: $dark-light3;
+  background: $light-gray;
 }
 
 .search-icon {
@@ -15,7 +15,7 @@
   transform: translateY(-50%);
 
   path {
-    fill: $dark-light4;
+    fill: $gray;
   }
 }
 
