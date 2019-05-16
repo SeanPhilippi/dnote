@@ -19,7 +19,9 @@ function Sidebar({ isReady, transacting }) {
         <Button
           id="T-unlock-pro-btn"
           type="submit"
-          className={classnames('button button-third button-stretch')}
+          className={classnames(
+            'button button-large button-third button-stretch'
+          )}
           disabled={transacting}
           isBusy={transacting || !isReady}
         >

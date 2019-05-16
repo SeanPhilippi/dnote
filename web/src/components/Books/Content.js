@@ -154,6 +154,7 @@ function Content({
           id="T-create-book-btn"
           type="button"
           kind="third"
+          size="normal"
           className={styles['create-book-button']}
           disabled={isFetching}
           onClick={() => {

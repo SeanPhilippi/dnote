@@ -220,7 +220,7 @@ const Sidebar = ({
                 id="T-create-note-btn"
                 type="button"
                 className={classnames(
-                  'button button-slim button-stretch button-third'
+                  'button button-normal button-slim button-stretch button-third'
                 )}
                 onClick={() => {
                   handleCreateNote({
