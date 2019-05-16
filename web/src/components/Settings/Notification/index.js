@@ -60,7 +60,7 @@ function Email({ emailPreferenceData, doGetEmailPreference }) {
       <Header heading="Notification" />
 
       <Body>
-        <div className="container">
+        <div className="container-wide">
           {successMsg && (
             <div className="row">
               <div className="col-12 col-lg-10">

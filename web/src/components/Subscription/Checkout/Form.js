@@ -70,7 +70,7 @@ function Form({ isReady, stripe, stripeLoadError }) {
 
   return (
     <form
-      className={classnames('container-narrow', styles.wrapper)}
+      className={classnames('container', styles.wrapper)}
       onSubmit={handleSubmit}
     >
       {errMessage && (
