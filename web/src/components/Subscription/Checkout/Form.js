@@ -10,6 +10,7 @@ import styles from './Form.module.scss';
 
 function Form({ isReady, stripe }) {
   const [nameOnCard, setNameOnCard] = useState('');
+  const [billingCountry, setBillingCountry] = useState('');
   const [transacting, setTransacting] = useState(false);
   const [errMessage, setErrMessage] = useState('');
 
@@ -23,16 +24,17 @@ function Form({ isReady, stripe }) {
     setTransacting(true);
 
     try {
-      const source = await stripe.createSource({
+      const { source } = await stripe.createSource({
         type: 'card',
         owner: {
           name: nameOnCard
         }
       });
 
-      console.log('source', source);
-
-      await paymentService.createSubscription({ source });
+      await paymentService.createSubscription({
+        source,
+        country: billingCountry
+      });
     } catch (err) {
       console.log('error subscribing', err);
       setErrMessage(err.message);
@@ -47,7 +49,9 @@ function Form({ isReady, stripe }) {
       onSubmit={handleSubmit}
     >
       {errMessage && (
-        <Flash type="danger">Failed to subscribe. Error: {errMessage}</Flash>
+        <Flash type="danger" className={styles.flash}>
+          Failed to subscribe. Error: {errMessage}
+        </Flash>
       )}
 
       <div className="row">
@@ -55,12 +59,27 @@ function Form({ isReady, stripe }) {
           <h1>You are almost there.</h1>
 
           <label htmlFor="name">
+            Name on Card
             <input
+              id="name"
               type="text"
               value={nameOnCard}
               onChange={e => {
                 const val = e.target.value;
                 setNameOnCard(val);
+              }}
+            />
+          </label>
+
+          <label htmlFor="billing-country">
+            Country
+            <input
+              id="billing-country"
+              type="text"
+              value={billingCountry}
+              onChange={e => {
+                const val = e.target.value;
+                setBillingCountry(val);
               }}
             />
           </label>

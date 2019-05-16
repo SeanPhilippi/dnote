@@ -21,6 +21,7 @@ package handlers
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 
@@ -38,10 +39,7 @@ import (
 	"github.com/stripe/stripe-go/webhook"
 )
 
-var planID = "plan_EpgsEvY27pajfo"
-
-func init() {
-}
+var proPlanID = "plan_EpgsEvY27pajfo"
 
 func getOrCreateStripeCustomer(tx *gorm.DB, user database.User) (*stripe.Customer, error) {
 	if user.StripeCustomerID != "" {
@@ -74,6 +72,45 @@ func getOrCreateStripeCustomer(tx *gorm.DB, user database.User) (*stripe.Custome
 	return c, nil
 }
 
+func addCustomerSource(customerID, sourceID string) (*stripe.PaymentSource, error) {
+	params := &stripe.CustomerSourceParams{
+		Customer: stripe.String(customerID),
+		Source: &stripe.SourceParams{
+			Token: stripe.String(sourceID),
+		},
+	}
+
+	src, err := paymentsource.New(params)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating source for customer")
+	}
+
+	return src, nil
+}
+
+func createCustomerSubscription(customerID, planID string) (*stripe.Subscription, error) {
+	subParams := &stripe.SubscriptionParams{
+		Customer: stripe.String(customerID),
+		Items: []*stripe.SubscriptionItemsParams{
+			{
+				Plan: stripe.String(planID),
+			},
+		},
+	}
+
+	s, err := sub.New(subParams)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating subscription for customer")
+	}
+
+	return s, nil
+}
+
+type createSubPayload struct {
+	Source  stripe.Source `json:"source"`
+	Country string        `json:"country"`
+}
+
 // createSub creates a subscription for a the current user
 func (a *App) createSub(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(helpers.KeyUser).(database.User)
@@ -82,62 +119,52 @@ func (a *App) createSub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload stripe.Source
+	var payload createSubPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, errors.Wrap(err, "decoding params").Error(), http.StatusInternalServerError)
+		handleError(w, "decoding params", err, http.StatusBadRequest)
 		return
 	}
+
+	log.Println(payload)
 
 	db := database.DBConn
 	tx := db.Begin()
 
+	if err := tx.Model(&user).
+		Update(map[string]interface{}{
+			"cloud":           true,
+			"billing_country": payload.Country,
+		}).Error; err != nil {
+		tx.Rollback()
+		handleError(w, "updating user", err, http.StatusInternalServerError)
+		return
+	}
+
 	customer, err := getOrCreateStripeCustomer(tx, user)
 	if err != nil {
 		tx.Rollback()
-		logger.Err("Error getting customer: %v\n", err)
-		http.Error(w, errors.New("something went wrong").Error(), http.StatusInternalServerError)
+		handleError(w, "getting customer", err, http.StatusInternalServerError)
 		return
 	}
 
-	params := &stripe.CustomerSourceParams{
-		Customer: stripe.String(customer.ID),
-		Source: &stripe.SourceParams{
-			Token: stripe.String(payload.ID),
-		},
-	}
-	_, err = paymentsource.New(params)
-	if err != nil {
+	if _, err = addCustomerSource(customer.ID, payload.Source.ID); err != nil {
 		tx.Rollback()
-		logger.Err("Error attaching source: %v\n", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		handleError(w, "attaching source", err, http.StatusInternalServerError)
 		return
 	}
 
-	subParams := &stripe.SubscriptionParams{
-		Customer: stripe.String(customer.ID),
-		Items: []*stripe.SubscriptionItemsParams{
-			{
-				Plan: stripe.String(planID),
-			},
-		},
-	}
-	_, err = sub.New(subParams)
-	if err != nil {
+	if _, err := createCustomerSubscription(customer.ID, proPlanID); err != nil {
 		tx.Rollback()
-		logger.Err("Error creating subscription: %v\n", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		handleError(w, "creating subscription", err, http.StatusInternalServerError)
 		return
 	}
 
-	user.Cloud = true
-	if err := tx.Save(&user).Error; err != nil {
-		tx.Rollback()
-		logger.Err("updating user: %v\n", err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
+	if err := tx.Commit().Error; err != nil {
+		handleError(w, "committing a subscription transaction", err, http.StatusInternalServerError)
 		return
 	}
 
-	tx.Commit()
+	w.WriteHeader(http.StatusOK)
 }
 
 type updateSubPayload struct {

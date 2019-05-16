@@ -29,7 +29,7 @@ import {
   getBooksPath,
   getNotePath,
   getDigestsPath,
-  subscriptionsPath
+  getSubscriptionPath
 } from '../../../../libs/paths';
 import { parseSearchString } from '../../../../libs/url';
 import {
@@ -297,7 +297,7 @@ const Sidebar = ({
               })}
             >
               <SafeLink
-                to={subscriptionsPath()}
+                to={getSubscriptionPath()}
                 onClick={handleLinkClick}
                 className="button button-slim button-stretch button-first"
               >
