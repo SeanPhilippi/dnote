@@ -90,7 +90,7 @@ function Form({ isReady, stripe, stripeLoadError }) {
       )}
 
       <div className="row">
-        <div className="col-12 col-md-7">
+        <div className="col-12 col-md-8">
           <div className={styles['content-wrapper']}>
             <h1 className={styles.heading}>You are almost there.</h1>
 
@@ -99,6 +99,7 @@ function Form({ isReady, stripe, stripeLoadError }) {
                 <label htmlFor="name" className="label-full">
                   <span className={styles.label}>Name on Card</span>
                   <input
+                    autoFocus
                     id="name"
                     className={classnames(
                       'text-input text-input-stretch text-input-medium',
@@ -126,9 +127,6 @@ function Form({ isReady, stripe, stripeLoadError }) {
                     className={classnames(styles['card-number'], styles.input, {
                       [styles['card-number-active']]: cardElementFocused
                     })}
-                    onReady={el => {
-                      el.focus();
-                    }}
                     onFocus={() => {
                       setCardElementFocused(true);
                     }}

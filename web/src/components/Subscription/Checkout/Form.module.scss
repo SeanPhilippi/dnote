@@ -4,7 +4,7 @@
 @import '../../App/rem';
 
 .wrapper {
-  margin-top: rem(32px);
+  margin-top: rem(52px);
 }
 
 .number {
@@ -40,11 +40,11 @@
 
 .heading {
   @include font-size('2x-large');
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .content-wrapper {
-  padding-right: rem(52px);
+  padding: 0 rem(52px);
 }
 
 .content {
