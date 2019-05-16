@@ -1,6 +1,7 @@
 @import '../App/font';
-@import '../App/variables';
+@import '../App/theme';
 @import '../App/rem';
+@import '../App/variables';
 
 .footer {
   @include font-size('small');

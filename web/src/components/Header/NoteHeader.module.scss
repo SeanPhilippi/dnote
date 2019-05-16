@@ -1,7 +1,8 @@
 @import '../App/responsive';
-@import '../App/variables';
+@import '../App/theme';
 @import '../App/rem';
 @import '../App/font';
+@import '../App/variables';
 
 .wrapper {
   background: $dark-light3;
