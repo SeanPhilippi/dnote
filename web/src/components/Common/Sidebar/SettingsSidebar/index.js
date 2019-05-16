@@ -97,7 +97,7 @@ const SettingsSidebar = ({ location, layoutData, doCloseSidebar }) => {
                 to={getHomePath()}
                 onClick={maybeCloseSidebar}
                 className={classnames(
-                  'button button-slim button-stretch button-third-outline',
+                  'button button-normal button-slim button-stretch button-third-outline',
                   styles['back-button']
                 )}
               >
