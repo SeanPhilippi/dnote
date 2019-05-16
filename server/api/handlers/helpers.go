@@ -107,6 +107,7 @@ func getClientType(origin string) string {
 	return "web"
 }
 
+// handleError logs the error and responds with the given status code with a generic status text
 func handleError(w http.ResponseWriter, logMessage string, err error, statusCode int) {
 	logger.Err("[%d] %s: %v\n", statusCode, logMessage, err)
 

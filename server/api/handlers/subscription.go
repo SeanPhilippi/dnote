@@ -20,13 +20,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/dnote/dnote/server/api/helpers"
-	"github.com/dnote/dnote/server/api/logger"
 	"github.com/dnote/dnote/server/api/operations"
 	"github.com/dnote/dnote/server/database"
 	"github.com/jinzhu/gorm"
@@ -217,12 +217,11 @@ func (a *App) updateSub(w http.ResponseWriter, r *http.Request) {
 
 	var payload updateSubPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, errors.Wrap(err, "decoding params").Error(), http.StatusInternalServerError)
+		handleError(w, "decoding params", err, http.StatusBadRequest)
 		return
 	}
-
 	if err := validateUpdateSubPayload(payload); err != nil {
-		http.Error(w, errors.Wrap(err, "invalid payload").Error(), http.StatusBadRequest)
+		handleError(w, "invalid payload", err, http.StatusBadRequest)
 		return
 	}
 
@@ -241,7 +240,7 @@ func (a *App) updateSub(w http.ResponseWriter, r *http.Request) {
 			statusCode = http.StatusInternalServerError
 		}
 
-		http.Error(w, errors.Wrapf(err, "during operation %s", payload.Op).Error(), statusCode)
+		handleError(w, fmt.Sprintf("during operation %s", payload.Op), err, statusCode)
 		return
 	}
 
@@ -265,13 +264,13 @@ type GetSubResponse struct {
 }
 
 func respondWithEmptySub(w http.ResponseWriter) {
-	emptyGetSubREsponse := GetSubResponse{
+	emptyGetSubResponse := GetSubResponse{
 		Items: []GetSubResponseItem{},
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(emptyGetSubREsponse); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err := json.NewEncoder(w).Encode(emptyGetSubResponse); err != nil {
+		handleError(w, "encoding response", err, http.StatusInternalServerError)
 		return
 	}
 }
@@ -294,7 +293,7 @@ func (a *App) getSub(w http.ResponseWriter, r *http.Request) {
 
 	if !i.Next() {
 		if err := i.Err(); err != nil {
-			http.Error(w, errors.Wrap(err, "fetching subscription").Error(), http.StatusInternalServerError)
+			handleError(w, "fetching subscription", err, http.StatusInternalServerError)
 			return
 		}
 
@@ -323,7 +322,7 @@ func (a *App) getSub(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleError(w, "encoding response", err, http.StatusInternalServerError)
 		return
 	}
 }
@@ -338,9 +337,10 @@ type GetStripeSourceResponse struct {
 
 func respondWithEmptyStripeToken(w http.ResponseWriter) {
 	var resp GetStripeSourceResponse
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleError(w, "encoding response", err, http.StatusInternalServerError)
 		return
 	}
 }
@@ -358,7 +358,7 @@ func (a *App) getStripeSource(w http.ResponseWriter, r *http.Request) {
 
 	c, err := customer.Get(user.StripeCustomerID, nil)
 	if err != nil {
-		http.Error(w, errors.Wrap(err, "fetching stripe customer").Error(), http.StatusInternalServerError)
+		handleError(w, "fetching stripe customer", err, http.StatusInternalServerError)
 		return
 	}
 	if c.DefaultSource == nil {
@@ -371,7 +371,7 @@ func (a *App) getStripeSource(w http.ResponseWriter, r *http.Request) {
 	}
 	cd, err := card.Get(c.DefaultSource.ID, params)
 	if err != nil {
-		http.Error(w, errors.Wrap(err, "fetching stripe card").Error(), http.StatusInternalServerError)
+		handleError(w, "fetching stripe card", err, http.StatusInternalServerError)
 		return
 	}
 
@@ -384,7 +384,7 @@ func (a *App) getStripeSource(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleError(w, "encoding response", err, http.StatusInternalServerError)
 		return
 	}
 }
@@ -392,16 +392,14 @@ func (a *App) getStripeSource(w http.ResponseWriter, r *http.Request) {
 func (a *App) stripeWebhook(w http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		logger.Err("Error reading request body: %v\n", err)
-		w.WriteHeader(http.StatusServiceUnavailable)
+		handleError(w, "reading body", err, http.StatusServiceUnavailable)
 		return
 	}
 
 	webhookSecret := os.Getenv("StripeWebhookSecret")
 	event, err := webhook.ConstructEvent(body, req.Header.Get("Stripe-Signature"), webhookSecret)
 	if err != nil {
-		logger.Err("Error verifying the signature: %v\n", err)
-		w.WriteHeader(http.StatusBadRequest)
+		handleError(w, "verifying stripe webhook signature", err, http.StatusBadRequest)
 		return
 	}
 
@@ -410,8 +408,7 @@ func (a *App) stripeWebhook(w http.ResponseWriter, req *http.Request) {
 		{
 			var subscription stripe.Subscription
 			if json.Unmarshal(event.Data.Raw, &subscription); err != nil {
-				logger.Err(errors.Wrap(err, "unmarshaling").Error())
-				w.WriteHeader(http.StatusBadRequest)
+				handleError(w, "unmarshaling payload", err, http.StatusBadRequest)
 				return
 			}
 
@@ -419,8 +416,8 @@ func (a *App) stripeWebhook(w http.ResponseWriter, req *http.Request) {
 		}
 	default:
 		{
-			logger.Err("Unsupported webhook event type %s", event.Type)
-			w.WriteHeader(http.StatusBadRequest)
+			msg := fmt.Sprintf("Unsupported webhook event type %s", event.Type)
+			handleError(w, msg, err, http.StatusBadRequest)
 			return
 		}
 	}
