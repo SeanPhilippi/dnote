@@ -179,33 +179,35 @@ button {
 }
 
 .text-input {
-  border: 1px solid $dark-light2;
+  border: 2px solid $dark-light2;
   padding: rem(4px) rem(12px);
   position: relative;
   border-radius: 2px;
+  display: block;
 
   &::placeholder {
     color: $dark-light4;
   }
   &:focus {
-    border: 1px solid $third;
+    border: 2px solid $third;
   }
 
-  &:not(.text-input-transparent) {
-    background: $dark-light3;
-  }
-  &.text-input-transparent {
-    background: transparent;
-  }
+  //  &:not(.text-input-transparent) {
+  //    background: $dark-light3;
+  //  }
+  //  &.text-input-transparent {
+  //    background: transparent;
+  //  }
 
   &.text-input-medium {
     padding: rem(8px) rem(12px);
   }
+
+  &.text-input-stretch {
+    width: 100%;
+  }
 }
 
-.learning-count {
-  @include font-size('medium');
-}
-.learning-date {
-  @include font-size('regular');
+.label-full {
+  width: 100%;
 }

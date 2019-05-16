@@ -4,7 +4,7 @@ import { StripeProvider, Elements } from 'react-stripe-elements';
 import { useScript } from '../../../libs/hooks';
 import CheckoutForm from './Form';
 
-function Checkout({ user }) {
+function Checkout() {
   const [stripeLoaded, stripeLoadError] = useScript('https://js.stripe.com/v3');
 
   let key;
@@ -22,7 +22,10 @@ function Checkout({ user }) {
   return (
     <StripeProvider stripe={stripe}>
       <Elements>
-        <CheckoutForm isReady={stripeLoaded} />
+        <CheckoutForm
+          stripeLoadError={stripeLoadError}
+          isReady={stripeLoaded}
+        />
       </Elements>
     </StripeProvider>
   );

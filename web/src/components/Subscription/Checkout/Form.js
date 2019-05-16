@@ -3,13 +3,38 @@ import classnames from 'classnames';
 import { injectStripe, CardElement } from 'react-stripe-elements';
 
 import Sidebar from './Sidebar';
+import CountrySelect from './CountrySelect';
 import Flash from '../../Common/Flash';
 import * as paymentService from '../../../services/payment';
 
 import styles from './Form.module.scss';
 
-function Form({ isReady, stripe }) {
+const elementStyles = {
+  base: {
+    color: '#32325D',
+    fontFamily: 'Source Code Pro, Consolas, Menlo, monospace',
+    fontSize: '16px',
+    fontSmoothing: 'antialiased',
+
+    '::placeholder': {
+      color: '#CFD7DF'
+    },
+    ':-webkit-autofill': {
+      color: '#e39f48'
+    }
+  },
+  invalid: {
+    color: '#E25950',
+
+    '::placeholder': {
+      color: '#FFCCA5'
+    }
+  }
+};
+
+function Form({ isReady, stripe, stripeLoadError }) {
   const [nameOnCard, setNameOnCard] = useState('');
+  const [cardElementFocused, setCardElementFocused] = useState(false);
   const [billingCountry, setBillingCountry] = useState('');
   const [transacting, setTransacting] = useState(false);
   const [errMessage, setErrMessage] = useState('');
@@ -53,47 +78,80 @@ function Form({ isReady, stripe }) {
           Failed to subscribe. Error: {errMessage}
         </Flash>
       )}
+      {stripeLoadError && (
+        <Flash type="danger" className={styles.flash}>
+          Failed to load stripe. {stripeLoadError}
+        </Flash>
+      )}
 
       <div className="row">
-        <div className="col-12 col-md-8">
-          <h1>You are almost there.</h1>
+        <div className="col-12 col-md-7">
+          <div className={styles['content-wrapper']}>
+            <h1 className={styles.heading}>You are almost there.</h1>
 
-          <label htmlFor="name">
-            Name on Card
-            <input
-              id="name"
-              type="text"
-              value={nameOnCard}
-              onChange={e => {
-                const val = e.target.value;
-                setNameOnCard(val);
-              }}
-            />
-          </label>
+            <div className={styles.content}>
+              <div className={styles['input-row']}>
+                <label htmlFor="name" className="label-full">
+                  <span className={styles.label}>Name on Card</span>
+                  <input
+                    id="name"
+                    className={classnames(
+                      'text-input text-input-stretch text-input-medium',
+                      styles.input
+                    )}
+                    type="text"
+                    value={nameOnCard}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setNameOnCard(val);
+                    }}
+                  />
+                </label>
+              </div>
 
-          <label htmlFor="billing-country">
-            Country
-            <input
-              id="billing-country"
-              type="text"
-              value={billingCountry}
-              onChange={e => {
-                const val = e.target.value;
-                setBillingCountry(val);
-              }}
-            />
-          </label>
+              <div
+                className={classnames(styles['input-row'], styles['card-row'])}
+              >
+                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                <label htmlFor="card-number" className={styles.number}>
+                  <span className={styles.label}>Card Number</span>
 
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label htmlFor="card" className={styles.card}>
-            Card detail
-            <CardElement
-              id="card"
-              onReady={el => {
-                el.focus();
-              }}
-            />
-          </label>
+                  <CardElement
+                    id="card"
+                    className={classnames(styles['card-number'], styles.input, {
+                      [styles['card-number-active']]: cardElementFocused
+                    })}
+                    onReady={el => {
+                      el.focus();
+                    }}
+                    onFocus={() => {
+                      setCardElementFocused(true);
+                    }}
+                    onBlur={() => {
+                      setCardElementFocused(false);
+                    }}
+                    style={elementStyles}
+                  />
+                </label>
+              </div>
+
+              <div className={styles['input-row']}>
+                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                <label htmlFor="billing-country" className="label-full">
+                  <span className={styles.label}>Country</span>
+                  <CountrySelect
+                    id="billing-country"
+                    className={styles['countries-select']}
+                    value={billingCountry}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setBillingCountry(val);
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="col-12 col-md-4">

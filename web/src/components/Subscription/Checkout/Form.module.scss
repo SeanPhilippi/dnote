@@ -1,4 +1,5 @@
 @import '../../App/responsive';
+@import '../../App/variables';
 @import '../../App/font';
 @import '../../App/rem';
 
@@ -6,10 +7,60 @@
   margin-top: rem(32px);
 }
 
-.card {
-  width: 100%;
+.number {
+  flex-grow: 1;
+}
+
+.cvc,
+.expiry {
+  width: rem(100px);
 }
 
 .flash {
   margin-bottom: rem(20px);
+}
+
+.label {
+  @include font-size('medium');
+}
+
+.input {
+  margin-top: rem(8px);
+}
+
+.input-row {
+  &:not(:first-child) {
+    margin-top: rem(8px);
+  }
+}
+
+.card-row {
+  display: flex;
+}
+
+.heading {
+  @include font-size('2x-large');
+  font-weight: 600;
+}
+
+.content-wrapper {
+  padding-right: rem(52px);
+}
+
+.content {
+  margin-top: rem(20px);
+}
+
+.card-number {
+  padding: rem(10px) rem(12px);
+  border: 2px solid $dark-light2;
+
+  &.card-number-active {
+    border: 2px solid $third;
+  }
+}
+
+.countries-select {
+  width: 100%;
+  display: block;
 }
