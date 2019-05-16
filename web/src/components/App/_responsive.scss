@@ -43,6 +43,8 @@ $sm-breakpoint: 321px;
   }
 }
 
+// overSidebarThreshold is a mixin that applies the given style if and only if
+// the current viewport width is above the sidebar threshold
 @mixin overSidebarThreshold() {
   @media (min-width: $note-sidebar-threshold) {
     @content;

@@ -19,7 +19,7 @@
   transform: translateX(0);
   height: 100%;
 
-  @include breakpoint(lg) {
+  @include overSidebarThreshold {
     position: relative;
     transform: initial;
     min-width: $note-sidebar-width;
@@ -91,7 +91,7 @@
   text-transform: uppercase;
   font-weight: 400;
 
-  @include breakpoint(lg) {
+  @include overSidebarThreshold {
     margin-top: 0;
     margin-left: 0;
   }

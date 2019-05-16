@@ -23,7 +23,7 @@
     bottom: auto;
   }
 
-  @include breakpoint(lg) {
+  @include overSidebarThreshold {
     background: none;
     position: relative;
     left: auto;
