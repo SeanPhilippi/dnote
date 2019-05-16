@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import classnames from 'classnames';
+import Helmet from 'react-helmet';
 import { injectStripe, CardElement } from 'react-stripe-elements';
 
 import Sidebar from './Sidebar';
@@ -73,6 +74,10 @@ function Form({ isReady, stripe, stripeLoadError }) {
       className={classnames('container', styles.wrapper)}
       onSubmit={handleSubmit}
     >
+      <Helmet>
+        <title>Subscriptions</title>
+      </Helmet>
+
       {errMessage && (
         <Flash type="danger" className={styles.flash}>
           Failed to subscribe. Error: {errMessage}
