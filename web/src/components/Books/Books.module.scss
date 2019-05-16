@@ -14,7 +14,7 @@
 .count {
   display: none;
 
-  @include breakpoint(lg) {
+  @include overSidebarThreshold {
     @include font-size('small');
     color: $black;
     display: inline-block;
