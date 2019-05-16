@@ -3,4 +3,10 @@ $note-sidebar-width: 244px;
 $xl-note-sidebar-width: 320px;
 $footer-height: 28px;
 $note-header-height: 60px;
-$note-sidebar-threshold: 1280px;
+
+$note-sidebar-threshold-value: 1280;
+$note-sidebar-threshold: '#{$note-sidebar-threshold-value}px';
+
+:export {
+  noteSidebarThreshold: $note-sidebar-threshold-value;
+}

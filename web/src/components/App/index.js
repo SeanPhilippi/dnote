@@ -40,7 +40,7 @@ import render from '../../routes';
 import { footerPaths, isDemoPath, checkBoxedLayout } from '../../libs/paths';
 import SystemMessage from '../Common/SystemMessage';
 
-import './module.scss';
+import './App.global.scss';
 import styles from './App.module.scss';
 
 function checkIsEditor(location, prevLocation) {

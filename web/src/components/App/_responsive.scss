@@ -1,6 +1,8 @@
+@import './variables';
+
 $xl-breakpoint: 1441px;
-$lg-breakpoint: 1280px;
-//$lg-breakpoint: 992px;
+//$lg-breakpoint: 1280px;
+$lg-breakpoint: 992px;
 //$md-breakpoint: 600px;
 $md-breakpoint: 768px;
 $sm-breakpoint: 321px;
@@ -38,5 +40,11 @@ $sm-breakpoint: 321px;
     @media (max-width: $lg-breakpoint - 1px) {
       @content;
     }
+  }
+}
+
+@mixin overSidebarThreshold() {
+  @media (min-width: $note-sidebar-threshold) {
+    @content;
   }
 }

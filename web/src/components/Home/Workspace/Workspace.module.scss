@@ -55,7 +55,7 @@
   min-height: rem(52px);
   display: flex;
 
-  @include breakpoint(lg) {
+  @include overSidebarThreshold {
     display: none;
   }
 }
@@ -65,7 +65,7 @@
   display: flex;
   align-items: center;
 
-  @include breakpoint(#{$note-sidebar-threshold}) {
+  @include overSidebarThreshold {
     display: none;
   }
 }
@@ -77,7 +77,7 @@
 
   height: 100%;
 
-  @include breakpoint(lg) {
+  @include overSidebarThreshold {
     justify-content: space-between;
   }
 }
@@ -99,7 +99,7 @@
 .desktop-book-selector {
   display: none;
 
-  @include breakpoint(lg) {
+  @include overSidebarThreshold {
     display: block;
   }
 }
