@@ -151,7 +151,10 @@ function Subscription({ userData }) {
   function renderPlanCta() {
     if (user && user.cloud) {
       return (
-        <Link to="/" className="button button-third-outline button-stretch">
+        <Link
+          to="/"
+          className="button button-normal button-third-outline button-stretch"
+        >
           Go to your notes
         </Link>
       );
@@ -161,7 +164,9 @@ function Subscription({ userData }) {
       <Link
         id="T-unlock-pro-btn"
         type="button"
-        className={classnames('button button-third button-stretch')}
+        className={classnames(
+          'button button-normal button-third button-stretch'
+        )}
         to={getSubscriptionCheckoutPath()}
       >
         Unlock
@@ -196,7 +201,7 @@ function Subscription({ userData }) {
                 href="https://github.com/dnote/dnote"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="button button-second-outline button-stretch"
+                className="button button-normal button-second-outline button-stretch"
               >
                 See source code
               </a>

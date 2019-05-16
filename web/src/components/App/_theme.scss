@@ -6,8 +6,10 @@ $dark-light3: #f7f7f7;
 $dark-light4: #929292;
 $dark-light5: #6e6e6e;
 $dark-bg: #f3f3f3;
+
 $black: #2a2a2a;
 $white: #ffffff;
+$gray: #686868;
 
 $border-color: #d8d8d8;
 $border-color-light: #f3f3f3;
@@ -18,14 +20,10 @@ $danger-background: #f8d7da;
 
 $first: #333745;
 $second: #e7e7e7;
-
-// $third: #245fc5;
-// $third: #6d6daa;
 $third: #4d4d8b;
-
-//$third: #18a0fb;
-//$third: #505061;
 $third-light: #ecf4ff;
 
-$link: #0061ff;
-$link-hover: #0052d9;
+$blue: #0061ff;
+
+$link: #6f53c0;
+$link-hover: darken($link, 5%);
