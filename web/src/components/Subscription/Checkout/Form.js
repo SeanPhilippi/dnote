@@ -90,7 +90,7 @@ function Form({ isReady, stripe, stripeLoadError }) {
       )}
 
       <div className="row">
-        <div className="col-12 col-md-8">
+        <div className="col-12 col-lg-7 col-xl-8">
           <div className={styles['content-wrapper']}>
             <h1 className={styles.heading}>You are almost there.</h1>
 
@@ -157,7 +157,7 @@ function Form({ isReady, stripe, stripeLoadError }) {
           </div>
         </div>
 
-        <div className="col-12 col-md-4">
+        <div className="col-12 col-lg-5 col-xl-4">
           <Sidebar isReady={isReady} transacting={transacting} />
         </div>
       </div>

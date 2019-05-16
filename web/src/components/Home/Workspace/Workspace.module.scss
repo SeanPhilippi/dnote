@@ -1,5 +1,6 @@
 @import '../../App/theme';
 @import '../../App/responsive';
+@import '../../App/variables';
 @import '../../App/rem';
 @import '../../App/font';
 
@@ -64,7 +65,7 @@
   display: flex;
   align-items: center;
 
-  @include breakpoint(lg) {
+  @include breakpoint(#{$note-sidebar-threshold}) {
     display: none;
   }
 }

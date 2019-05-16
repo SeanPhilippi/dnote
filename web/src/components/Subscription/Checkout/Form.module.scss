@@ -30,7 +30,7 @@
 
 .input-row {
   &:not(:first-child) {
-    margin-top: rem(8px);
+    margin-top: rem(20px);
   }
 }
 
@@ -39,16 +39,18 @@
 }
 
 .heading {
-  @include font-size('2x-large');
+  @include font-size('3x-large');
   font-weight: 400;
 }
 
 .content-wrapper {
-  padding: 0 rem(52px);
+  @include breakpoint(lg) {
+    padding: 0 rem(52px);
+  }
 }
 
 .content {
-  margin-top: rem(20px);
+  margin-top: rem(32px);
 }
 
 .card-number {
