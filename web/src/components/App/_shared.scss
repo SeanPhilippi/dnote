@@ -179,7 +179,7 @@ button {
 }
 
 .text-input {
-  border: 2px solid $dark-light2;
+  border: 2px solid $border-color;
   padding: rem(4px) rem(12px);
   position: relative;
   border-radius: 2px;
@@ -210,4 +210,12 @@ button {
 
 .label-full {
   width: 100%;
+}
+
+a {
+  color: $link;
+
+  &:hover {
+    color: $link-hover;
+  }
 }

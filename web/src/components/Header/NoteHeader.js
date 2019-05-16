@@ -34,7 +34,7 @@ function NoteHeader({ demo }) {
 
         <Link
           to={getHomePath({}, { demo })}
-          className="button button-slim button-first-outline"
+          className="button button-normal button-slim button-first-outline"
         >
           Go to Dnote
         </Link>

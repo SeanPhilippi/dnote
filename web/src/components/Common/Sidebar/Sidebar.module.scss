@@ -34,7 +34,7 @@
 }
 
 .sidebar {
-  background: $dark-light;
+  background: $light;
   min-width: $sidebar-width;
   width: $sidebar-width;
   transition: 0.25s cubic-bezier(0, 0, 0, 1);
@@ -95,16 +95,16 @@
   &:hover {
     color: $black;
     text-decoration: none;
-    background: #eaeaea;
+    background: darken($light, 5%);
   }
 
   &:focus {
-    background: #eaeaea;
+    background: darken($light, 5%);
     outline: none;
   }
 
   &.link-active {
-    background: $dark-light2;
+    background: darken($light, 5%);
   }
 }
 

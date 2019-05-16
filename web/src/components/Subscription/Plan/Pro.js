@@ -7,12 +7,12 @@ import GlobeIcon from '../../Icons/Globe';
 const proPerks = [
   {
     id: 'hosted',
-    icon: <ServerIcon width="16" height="16" fill="#245fc5" />,
+    icon: <ServerIcon width="16" height="16" fill="#4d4d8b" />,
     value: 'Fully hosted and managed'
   },
   {
     id: 'support',
-    icon: <GlobeIcon width="16" height="16" fill="#245fc5" />,
+    icon: <GlobeIcon width="16" height="16" fill="#4d4d8b" />,
     value: 'Support the Dnote community and development'
   }
 ];

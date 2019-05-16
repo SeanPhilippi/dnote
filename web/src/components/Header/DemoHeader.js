@@ -49,13 +49,19 @@ function DemoHeader({ user }) {
       <div className={styles.right}>
         <Link
           to={getPricingPath(user)}
-          className={classnames(styles.cta, 'button button-second')}
+          className={classnames(
+            styles.cta,
+            'button button-normal button-second'
+          )}
         >
           Get started
         </Link>
         <a
           href="/"
-          className={classnames(styles['quit-mobile'], 'button button-first')}
+          className={classnames(
+            styles['quit-mobile'],
+            'button button-normal button-first'
+          )}
         >
           Quit demo
         </a>

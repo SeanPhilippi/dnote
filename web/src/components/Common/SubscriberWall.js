@@ -33,12 +33,15 @@ function SubscriberWall({ wrapperClassName }) {
       <div className={styles.lead}>Unlock Dnote Pro to get started.</div>
 
       <div className={styles.actions}>
-        <Link to={getSubscriptionPath()} className="button button-first">
+        <Link
+          to={getSubscriptionPath()}
+          className="button button-normal button-first"
+        >
           Get started
         </Link>
         <Link
           to={getHomePath({}, { demo: true })}
-          className="button button-first-outline "
+          className="button button-normal button-first-outline "
         >
           Live demo
         </Link>

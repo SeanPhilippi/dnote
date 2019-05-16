@@ -16,7 +16,7 @@
 
   @include breakpoint(lg) {
     @include font-size('small');
-    color: $dark;
+    color: $black;
     display: inline-block;
 
     &.hidden {
