@@ -45,7 +45,7 @@
 
 .content-wrapper {
   @include breakpoint(lg) {
-    padding: 0 rem(52px);
+    padding-right: rem(52px);
   }
 }
 

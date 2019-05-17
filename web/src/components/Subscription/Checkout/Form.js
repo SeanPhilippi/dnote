@@ -144,7 +144,10 @@ function Form({ isReady, stripe, stripeLoadError }) {
                   <span className={styles.label}>Country</span>
                   <CountrySelect
                     id="billing-country"
-                    className={styles['countries-select']}
+                    className={classnames(
+                      styles['countries-select'],
+                      styles.input
+                    )}
                     value={billingCountry}
                     onChange={e => {
                       const val = e.target.value;
