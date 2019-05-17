@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 import classnames from 'classnames';
 import Helmet from 'react-helmet';
 import { injectStripe, CardElement } from 'react-stripe-elements';
@@ -7,6 +9,9 @@ import Sidebar from './Sidebar';
 import CountrySelect from './CountrySelect';
 import Flash from '../../Common/Flash';
 import * as paymentService from '../../../services/payment';
+import { getCurrentUser } from '../../../actions/auth';
+import { updateMessage } from '../../../actions/ui';
+import { getHomePath } from '../../../libs/paths';
 
 import styles from './Form.module.scss';
 
@@ -33,9 +38,17 @@ const elementStyles = {
   }
 };
 
-function Form({ isReady, stripe, stripeLoadError }) {
+function Form({
+  stripe,
+  stripeLoadError,
+  doGetCurrentUser,
+  doUpdateMessage,
+  history
+}) {
   const [nameOnCard, setNameOnCard] = useState('');
+  const cardElementRef = useRef(null);
   const [cardElementFocused, setCardElementFocused] = useState(false);
+  const [cardElementLoaded, setCardElementLoaded] = useState(false);
   const [billingCountry, setBillingCountry] = useState('');
   const [transacting, setTransacting] = useState(false);
   const [errMessage, setErrMessage] = useState('');
@@ -43,19 +56,32 @@ function Form({ isReady, stripe, stripeLoadError }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!isReady) {
+    if (!cardElementLoaded) {
+      return;
+    }
+    if (!nameOnCard) {
+      setErrMessage('Please enter the name on card');
+      return;
+    }
+    if (!billingCountry) {
+      setErrMessage('Please enter the country');
       return;
     }
 
     setTransacting(true);
 
     try {
-      const { source } = await stripe.createSource({
+      const { source, error } = await stripe.createSource({
         type: 'card',
+        currency: 'usd',
         owner: {
           name: nameOnCard
         }
       });
+
+      if (error) {
+        throw error;
+      }
 
       await paymentService.createSubscription({
         source,
@@ -64,9 +90,17 @@ function Form({ isReady, stripe, stripeLoadError }) {
     } catch (err) {
       console.log('error subscribing', err);
       setErrMessage(err.message);
+      return;
     }
 
+    setNameOnCard('');
+    setBillingCountry('');
+    cardElementRef.current.clear();
     setTransacting(false);
+
+    await doGetCurrentUser();
+    doUpdateMessage('Welcome to Dnote Pro', 'info');
+    history.push(getHomePath({}, { demo: false }));
   }
 
   return (
@@ -79,12 +113,18 @@ function Form({ isReady, stripe, stripeLoadError }) {
       </Helmet>
 
       {errMessage && (
-        <Flash type="danger" className={styles.flash}>
-          Failed to subscribe. Error: {errMessage}
+        <Flash
+          type="danger"
+          wrapperClassName={styles.flash}
+          onDismiss={() => {
+            setErrMessage('');
+          }}
+        >
+          {errMessage}
         </Flash>
       )}
       {stripeLoadError && (
-        <Flash type="danger" className={styles.flash}>
+        <Flash type="danger" wrapperClassName={styles.flash}>
           Failed to load stripe. {stripeLoadError}
         </Flash>
       )}
@@ -133,6 +173,10 @@ function Form({ isReady, stripe, stripeLoadError }) {
                     onBlur={() => {
                       setCardElementFocused(false);
                     }}
+                    onReady={el => {
+                      cardElementRef.current = el;
+                      setCardElementLoaded(true);
+                    }}
                     style={elementStyles}
                   />
                 </label>
@@ -161,11 +205,23 @@ function Form({ isReady, stripe, stripeLoadError }) {
         </div>
 
         <div className="col-12 col-lg-5 col-xl-4">
-          <Sidebar isReady={isReady} transacting={transacting} />
+          <Sidebar isReady={cardElementLoaded} transacting={transacting} />
         </div>
       </div>
     </form>
   );
 }
 
-export default injectStripe(Form);
+const mapDispatchToProps = {
+  doGetCurrentUser: getCurrentUser,
+  doUpdateMessage: updateMessage
+};
+
+export default injectStripe(
+  withRouter(
+    connect(
+      null,
+      mapDispatchToProps
+    )(Form)
+  )
+);

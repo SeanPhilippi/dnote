@@ -118,7 +118,7 @@ function Email({ emailPreferenceData, doGetEmailPreference }) {
                 <Link
                   to={getSettingsPath('account')}
                   className={classnames(
-                    'button button-second',
+                    'button button-normal button-second',
                     settingsStyles['verification-banner-cta']
                   )}
                 >

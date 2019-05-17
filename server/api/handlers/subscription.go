@@ -22,9 +22,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/dnote/dnote/server/api/helpers"
 	"github.com/dnote/dnote/server/api/operations"
@@ -35,6 +35,7 @@ import (
 	"github.com/stripe/stripe-go/card"
 	"github.com/stripe/stripe-go/customer"
 	"github.com/stripe/stripe-go/paymentsource"
+	"github.com/stripe/stripe-go/source"
 	"github.com/stripe/stripe-go/sub"
 	"github.com/stripe/stripe-go/webhook"
 )
@@ -73,6 +74,7 @@ func getOrCreateStripeCustomer(tx *gorm.DB, user database.User) (*stripe.Custome
 }
 
 func addCustomerSource(customerID, sourceID string) (*stripe.PaymentSource, error) {
+
 	params := &stripe.CustomerSourceParams{
 		Customer: stripe.String(customerID),
 		Source: &stripe.SourceParams{
@@ -124,8 +126,6 @@ func (a *App) createSub(w http.ResponseWriter, r *http.Request) {
 		handleError(w, "decoding params", err, http.StatusBadRequest)
 		return
 	}
-
-	log.Println(payload)
 
 	db := database.DBConn
 	tx := db.Begin()
@@ -345,6 +345,56 @@ func respondWithEmptyStripeToken(w http.ResponseWriter) {
 	}
 }
 
+// getStripeCard retrieves card information from stripe and returns a stripe.Card
+// It handles legacy 'card' resource which have 'card_' prefixes, as well as the
+// more up-to-date 'source' resources which have 'src_' prefixes.
+func getStripeCard(stripeCustomerID, sourceID string) (*stripe.Card, error) {
+	if strings.HasPrefix(sourceID, "card_") {
+		params := &stripe.CardParams{
+			Customer: stripe.String(stripeCustomerID),
+		}
+		cd, err := card.Get(sourceID, params)
+		if err != nil {
+			return nil, errors.Wrap(err, "fetching card")
+		}
+
+		return cd, nil
+	} else if strings.HasPrefix(sourceID, "src_") {
+		src, err := source.Get(sourceID, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "fetching source")
+		}
+
+		brand, ok := src.TypeData["brand"].(string)
+		if !ok {
+			return nil, errors.New("casting brand")
+		}
+		last4, ok := src.TypeData["last4"].(string)
+		if !ok {
+			return nil, errors.New("casting last4")
+		}
+		expMonth, ok := src.TypeData["exp_month"].(float64)
+		if !ok {
+			return nil, errors.New("casting exp_month")
+		}
+		expYear, ok := src.TypeData["exp_year"].(float64)
+		if !ok {
+			return nil, errors.New("casting exp_year")
+		}
+
+		cd := &stripe.Card{
+			Brand:    stripe.CardBrand(brand),
+			Last4:    last4,
+			ExpMonth: uint8(expMonth),
+			ExpYear:  uint16(expYear),
+		}
+
+		return cd, nil
+	}
+
+	return nil, errors.Errorf("malformed sourceID %s", sourceID)
+}
+
 func (a *App) getStripeSource(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(helpers.KeyUser).(database.User)
 	if !ok {
@@ -361,17 +411,15 @@ func (a *App) getStripeSource(w http.ResponseWriter, r *http.Request) {
 		handleError(w, "fetching stripe customer", err, http.StatusInternalServerError)
 		return
 	}
+
 	if c.DefaultSource == nil {
 		respondWithEmptyStripeToken(w)
 		return
 	}
 
-	params := &stripe.CardParams{
-		Customer: stripe.String(user.StripeCustomerID),
-	}
-	cd, err := card.Get(c.DefaultSource.ID, params)
+	cd, err := getStripeCard(user.StripeCustomerID, c.DefaultSource.ID)
 	if err != nil {
-		handleError(w, "fetching stripe card", err, http.StatusInternalServerError)
+		handleError(w, "fetching stripe source", err, http.StatusInternalServerError)
 		return
 	}
 

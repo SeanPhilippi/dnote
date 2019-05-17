@@ -22,10 +22,7 @@ function Checkout() {
   return (
     <StripeProvider stripe={stripe}>
       <Elements>
-        <CheckoutForm
-          stripeLoadError={stripeLoadError}
-          isReady={stripeLoaded}
-        />
+        <CheckoutForm stripeLoadError={stripeLoadError} />
       </Elements>
     </StripeProvider>
   );
